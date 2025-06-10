@@ -1,0 +1,46 @@
+Принцип работы:
+Extract: чтение CSV-файла
+Transform: очистка данных и создание поля "Координаты"
+Load: сохранение в SQLite БД с индексацией
+
+Начинаем:
+создаем условный файл с условными данными: 
+
+Объект,Широта,Долгота,Высота,Погрешность
+ЖК Созвездие,55.813,37.394,150.5,5
+БЦ Небо,55.726,37.568,120.0,3
+
+Далее код:
+
+import pandas as pd  
+import sqlite3
+
+# Extract (извлечение)
+raw_data = pd.read_csv('raw_geodata.csv')
+print("Исходные данные:")
+print(raw_data.head())
+
+# Transform (преобразование)
+clean_data = raw_data.dropna()  # Удаление пустых строк
+clean_data['Координаты'] = clean_data.apply(
+    lambda row: f"{row['Широта']},{row['Долгота']}", 
+    axis=1
+)
+
+# Load (загрузка)
+conn = sqlite3.connect('geodata.db')
+clean_data.to_sql('geodetic_measurements', conn, index=False, if_exists='replace')
+
+# Проверка
+print("\nДанные в базе:")
+print(pd.read_sql_query("SELECT * FROM geodetic_measurements", conn))
+
+conn.close()
+print("ETL-процесс завершен! Данные сохранены в geodata.db")
+
+
+Далее запускаем код:
+python etl_pipeline.py
+
+
+просмотр результата (geodata.db) тут: https://sqlitebrowser.org/
