@@ -11,3 +11,42 @@
 |--------------|-----------------|-------------|----------------|------------------|------------------|
 | ЖК Созвездие | Топосъемка | 2024-01-10 | 2024-01-12 | 150 | 5 |
 | БЦ Небо | Разбивочные раб.| 2024-01-15 | 2024-01-18 | 80 | 3 |
+
+Далее код: =
+
+
+import pandas as pd
+from datetime import datetime
+import matplotlib.pyplot as plt
+
+# Чтение данных
+df = pd.read_excel('geodetic_work_log.xlsx')
+
+# Преобразование дат
+df['Дата начала'] = pd.to_datetime(df['Дата начала'])
+df['Дата окончания'] = pd.to_datetime(df['Дата окончания'])
+df['Длительность'] = (df['Дата окончания'] - df['Дата начала']).dt.days
+
+# Анализ
+mean_by_type = df.groupby('Тип работ')['Длительность'].mean()
+print("Средняя длительность работ:")
+print(mean_by_type)
+
+# Визуализация
+plt.figure(figsize=(10, 5))
+plt.scatter(df['Количество точек'], df['Длительность'], alpha=0.7)
+plt.title('Зависимость длительности от объема работ')
+plt.xlabel('Количество точек')
+plt.ylabel('Дни')
+plt.grid(True)
+plt.savefig('duration_vs_points.png')
+
+# Сохранение отчета
+df.to_csv('geodetic_report.csv', index=False)
+print("Отчет сохранен в geodetic_report.csv")
+
+
+Далее запускаем скрипт 
+python geodetic_analysis.py
+
+вроде должно работать)
